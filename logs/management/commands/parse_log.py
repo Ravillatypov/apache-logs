@@ -12,9 +12,17 @@ class Command(TqdmBaseCommand, BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('url', type=str)
+        parser.add_argument(
+            '-c',
+            '--chunk_size',
+            type=int,
+            default=1,
+            help='Chunk size in MB'
+        )
 
     def handle(self, *args, **options):
         url = options.get('url', '')
+        chunk_size = options.get('chunk_size') * 1024 * 1024
         content = b''
         resp = requests.head(url, allow_redirects=True)
         if resp.status_code >= 300:
@@ -28,21 +36,22 @@ class Command(TqdmBaseCommand, BaseCommand):
             unit_scale=True,
             desc=f'Parsing log {url.split("/")[-1]}'
         )
+        objects = []
         resp = requests.get(url, headers=header, stream=True, allow_redirects=True)
-        for chunk in resp.iter_content(chunk_size=1024):
+        for chunk in resp.iter_content(chunk_size=chunk_size):
             if chunk:
                 content += chunk
-                progress_bar.update(1024)
+                progress_bar.update(chunk_size)
             *lines, content = content.splitlines()
             for line in lines:
-                self.parse_and_save(line.decode())
+                data = parse_apache_log(line.decode())
+                if data:
+                    objects.append(
+                        AccessLog(**data)
+                    )
+            AccessLog.objects.bulk_create(objects)
+            objects = []
         if content:
-            self.parse_and_save(content.decode())
-
-    def parse_and_save(self, line: str):
-        data = parse_apache_log(line)
-        if data:
-            try:
+            data = parse_apache_log(content.decode())
+            if data:
                 AccessLog.objects.create(**data)
-            except Error as err:
-                self.info(f'Error on saving log: {err}')
