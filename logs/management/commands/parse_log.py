@@ -1,6 +1,5 @@
 import requests
 from django.core.management.base import BaseCommand
-from django.db.utils import Error
 from django_tqdm import BaseCommand as TqdmBaseCommand
 
 from logs.models import AccessLog
