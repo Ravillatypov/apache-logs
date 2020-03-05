@@ -40,6 +40,7 @@ if DEBUG:
 
 INSTALLED_APPS = [
     'logs',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -127,3 +128,9 @@ STATIC_URL = '/static/'
 DB_URL = env.str('DB_URL', default='')
 if DB_URL:
     DATABASES['default'] = dj_database_url.config(default=DB_URL)
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+}
