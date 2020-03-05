@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any, Union, Dict
+import re
 
 
 def get_int(number: str, default: Any = None) -> Union[int, Any]:
@@ -16,6 +17,13 @@ def get_datetime(date_str: str, format: str = '', default: Any = None) -> Union[
     except ValueError:
         return default
     return result
+
+
+def get_ip(value: str) -> str:
+    g = re.match(r'(\d{1,3}\.){3}\d{1,3}', value)
+    if g:
+        return g.group()
+    return ''
 
 
 def parse_apache_log(line: str) -> Union[Dict[str, Any], None]:
@@ -45,11 +53,11 @@ def parse_apache_log(line: str) -> Union[Dict[str, Any], None]:
         return None
     method, path, *_ = result[4].split()
     return {
-        'ip': result[0],
+        'ip': get_ip(result[0]),
         'date': get_datetime(result[3], '[%d/%b/%Y:%H:%M:%S %z]'),
-        'method': method,
-        'path': path,
+        'method': method[:10],
+        'path': path[:255],
         'response_code': get_int(result[5]),
         'response_size': get_int(result[6]),
-        'user_agent': result[8]
+        'user_agent': result[8][:255]
     }
