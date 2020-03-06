@@ -14,6 +14,21 @@ class AccessLog(models.Model):
         return f'[{self.date}] {self.ip}, {self.method}, {self.path}'
 
     class Meta:
-        ordering = ('date',)
+        ordering = ('-date',)
         verbose_name = 'Лог'
         verbose_name_plural = 'Логи'
+
+
+class Parsing(models.Model):
+    started_at = models.DateTimeField()
+    finished_at = models.DateTimeField()
+    url = models.URLField()
+    content_length = models.BigIntegerField()
+
+    def __str__(self):
+        return f'[{self.url}] {self.content_length}'
+
+    class Meta:
+        ordering = ('-started_at',)
+        verbose_name = 'Парсинг'
+        verbose_name_plural = 'Парсинг'
