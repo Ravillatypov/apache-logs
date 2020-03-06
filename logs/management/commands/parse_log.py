@@ -41,8 +41,8 @@ class Command(TqdmBaseCommand, BaseCommand):
                     return
 
                 parsed_length = self.parse_and_save(resp, chunk_size, unparsed)
-            except (KeyboardInterrupt, OSError) as err:
-                print(f'Error: {err}')
+            except (KeyboardInterrupt, OSError):
+                pass
             except Exception as err:
                 self.stderr.write(f'Error: {err}')
             finally:
@@ -63,7 +63,7 @@ class Command(TqdmBaseCommand, BaseCommand):
 
         # get response size, last parsing info for this url
         file_size = int(resp.headers.get('Content-Length'))
-        last_parsing = Parsing.objects.filter(url=url).order_by('-started_at').first()
+        last_parsing = Parsing.objects.filter(url=url).order_by('-finished_at').first()
         if last_parsing:
             first_byte = last_parsing.content_length + 1
         else:
