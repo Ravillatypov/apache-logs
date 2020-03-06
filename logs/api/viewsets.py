@@ -7,6 +7,9 @@ from rest_framework import filters, generics, permissions, response
 
 from logs.api.serializers import AccessLogSerializer
 from logs.models import AccessLog
+from django.core.cache import cache
+from hashlib import md5
+import json
 
 
 class AccessLogListView(generics.ListAPIView):
@@ -19,7 +22,14 @@ class AccessLogListView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        statistics = self.get_statistics(queryset)
+
+        request_hash = md5(str(request.GET).encode()).hexdigest()
+        statistics = cache.get(request_hash)
+        if statistics:
+            statistics = json.loads(statistics)
+        else:
+            statistics = self.get_statistics(queryset)
+            cache.set(request_hash, json.dumps(statistics), 300)
 
         page = self.paginate_queryset(queryset)
         if page is not None:

@@ -10,6 +10,7 @@ services:
       sh -c "python manage.py migrate && gunicorn app.wsgi:application -b 0.0.0.0:8000"
     environment:
       - DB_URL=postgres://logs:secretpassword@db/apache_logs
+      - REDIS_URL=redis://redis:6379/1
     depends_on:
       - db
 
@@ -19,3 +20,6 @@ services:
       - POSTGRES_DB=apache_logs
       - POSTGRES_USER=logs
       - POSTGRES_PASSWORD=secretpassword
+
+  redis:
+    image: redis:5-alpine
