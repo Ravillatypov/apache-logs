@@ -1,9 +1,7 @@
-import logging
 import re
 from datetime import datetime
 from typing import Any, Union, Dict
 
-logger = logging.getLogger(__name__)
 HTTP_METHODS = ('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE')
 
 
@@ -54,12 +52,10 @@ def parse_apache_log(line: str) -> Union[Dict[str, Any], None]:
             result.append(i)
 
     if len(result) < 9:
-        logger.warning(f'Invalid format: {line}')
         return None
     method, path, *_ = result[4].split()
     method = method.strip().upper()
     if method not in HTTP_METHODS:
-        logger.warning(f'Invalid http method: {line}')
         return None
     return {
         'ip': get_ip(result[0]),
