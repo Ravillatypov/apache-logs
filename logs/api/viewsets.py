@@ -16,7 +16,6 @@ class AccessLogListView(generics.ListAPIView):
     search_fields = ['ip', 'method', 'path']
     filterset_fields = ['ip', 'method', 'path', 'date', 'response_code']
     permission_classes = [permissions.AllowAny]
-    ordering_fields = '__all__'
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

@@ -5,4 +5,4 @@ from logs.models import AccessLog
 class AccessLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessLog
-        fields = '__all__'
+        exclude = ('id',)
