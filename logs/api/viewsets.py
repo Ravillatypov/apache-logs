@@ -8,6 +8,7 @@ from django.db.models import QuerySet, F, Count, Sum, Window
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, permissions, response
 
+from logs.api.filters import AccessLogFilter
 from logs.api.serializers import AccessLogSerializer
 from logs.models import AccessLog
 
@@ -17,13 +18,15 @@ class AccessLogListView(generics.ListAPIView):
     serializer_class = AccessLogSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['ip', 'method', 'path']
-    filterset_fields = ['ip', 'method', 'path', 'date', 'response_code']
+    filterset_fields = ['ip', 'method', 'path', 'date_from', 'date_to', 'response_code']
     permission_classes = [permissions.AllowAny]
+    filterset_class = AccessLogFilter
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        request_hash = md5(str(request.GET).encode()).hexdigest()
+        filter_query = {k: v for k, v in request.GET.items() if v and k in self.filterset_fields}
+        request_hash = md5(str(filter_query).encode()).hexdigest()
         statistics = cache.get(request_hash)
         if statistics:
             statistics = json.loads(statistics)
