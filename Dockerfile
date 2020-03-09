@@ -15,6 +15,5 @@ RUN apk add --update --no-cache --virtual .tmp-build-deps \
     apk del .tmp-build-deps
 
 COPY . /app
-RUN cd /app && python manage.py collectstatic
 
 CMD ["gunicorn", "app.wsgi:application", "-b", "0.0.0.0:8000"]

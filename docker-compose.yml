@@ -4,8 +4,6 @@ services:
   app:
     build:
       context: .
-    ports:
-      - "8000:8000"
     command: >
       sh -c "python manage.py migrate && gunicorn app.wsgi:application -b 0.0.0.0:8000"
     environment:
@@ -23,3 +21,11 @@ services:
 
   redis:
     image: redis:5-alpine
+
+  nginx:
+    build:
+      context: ./frontend
+    depends_on:
+      - app
+    ports:
+      - "8080:80"
